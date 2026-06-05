@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="500" viewBox="0 0 1180 500" role="img" aria-labelledby="title desc">
+  <title id="title">市面上常见的 CI/CD 实现方式</title>
+  <desc id="desc">Jenkins, GitHub Actions, cloud pipeline, Kubernetes GitOps, GitLab Runner comparison.</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #1f2933; }
+      .subtitle { font: 400 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #52616b; }
+      .card-title { font: 700 22px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #1f2933; }
+      .body { font: 400 15px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #3e4c59; }
+      .label { font: 700 14px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #0f5132; }
+      .card { fill: #ffffff; stroke: #d8dee9; stroke-width: 2; rx: 8; }
+      .choice { fill: #e6f4ea; stroke: #2f9e44; stroke-width: 3; rx: 8; }
+      .muted { fill: #f8fafc; }
+      .line { stroke: #8b95a1; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8b95a1" />
+    </marker>
+  </defs>
+  <rect width="1180" height="500" fill="#fbfcfe"/>
+  <text class="title" x="40" y="54">市面上常见的 CI/CD 实现方式</text>
+  <text class="subtitle" x="40" y="84">不同方案的核心差异不在“能不能自动化”，而在代码托管、执行环境、部署形态和治理成本。</text>
+
+  <rect class="card muted" x="40" y="130" width="200" height="220"/>
+  <text class="card-title" x="70" y="172">Jenkins</text>
+  <text class="body" x="70" y="212">插件生态强</text>
+  <text class="body" x="70" y="240">自定义空间大</text>
+  <text class="body" x="70" y="268">维护治理成本高</text>
+
+  <rect class="card muted" x="270" y="130" width="200" height="220"/>
+  <text class="card-title" x="300" y="172">GitHub Actions</text>
+  <text class="body" x="300" y="212">GitHub 生态友好</text>
+  <text class="body" x="300" y="240">配置轻量</text>
+  <text class="body" x="300" y="268">内网部署需评估</text>
+
+  <rect class="card muted" x="500" y="130" width="200" height="220"/>
+  <text class="card-title" x="530" y="172">云厂商流水线</text>
+  <text class="body" x="530" y="212">云资源集成好</text>
+  <text class="body" x="530" y="240">制品与权限完整</text>
+  <text class="body" x="530" y="268">可能产生厂商绑定</text>
+
+  <rect class="card muted" x="730" y="130" width="200" height="220"/>
+  <text class="card-title" x="760" y="172">K8s GitOps</text>
+  <text class="body" x="760" y="212">适合云原生</text>
+  <text class="body" x="760" y="240">配置即期望状态</text>
+  <text class="body" x="760" y="268">依赖集群治理成熟</text>
+
+  <rect class="choice" x="960" y="118" width="180" height="244"/>
+  <text class="label" x="1000" y="150">本文方案</text>
+  <text class="card-title" x="992" y="188">GitLab Runner</text>
+  <text class="body" x="990" y="228">贴合 GitLab 仓库</text>
+  <text class="body" x="990" y="256">自有构建机可控</text>
+  <text class="body" x="990" y="284">便于回写 GitOps</text>
+  <text class="body" x="990" y="312">适配内网部署链路</text>
+
+  <path class="line" d="M245 240 C255 240, 255 240, 265 240"/>
+  <path class="line" d="M475 240 C485 240, 485 240, 495 240"/>
+  <path class="line" d="M705 240 C715 240, 715 240, 725 240"/>
+  <path class="line" d="M935 240 C945 240, 945 240, 955 240"/>
+  <text class="subtitle" x="40" y="420">选择 GitLab Runner 的原因：代码、流水线上下文、Runner 执行节点、GitOps 配置都能放在同一套 GitLab 体系里协作。</text>
+</svg>

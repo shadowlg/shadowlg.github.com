@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Z晓L's Blog, welcome to my nerverland">
+
+
+        <title>近期对于AI Coding落地的理解：不仅是模型，还需要软件工程 // Z晓L's Blog // welcome to my nerverland</title>
+
+    <link href="/favicon.ico" rel="icon">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/solarized.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QL28PSLX3Z"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+
+       gtag('config', 'G-QL28PSLX3Z');
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="/author/nexrol.html" title="See posts by nexrol">
+                </a>
+                <h2 class="article-info">nexrol</h2>
+                <!--small class="about-author"></small-->
+                <p class="social">
+                        <a href="#">
+                            <i class="fa fa-github fa-lg"></i>
+                        </a>
+                        <a href="http://weibo.com/shadowlg">
+                            <i class="fa fa-weibo fa-lg"></i>
+                        </a>
+                        <a href="#">
+                            <i class="fa fa-envelope fa-lg"></i>
+                        </a>
+                        <a href="#">
+                            <i class="fa fa-rss-square fa-lg"></i>
+                        </a>
+                </p>
+                <h5>Published</h5>
+                <p>五 15 五月 2026</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>近期对于AI Coding落地的理解：不仅是模型，还需要软件工程</h1>
+                        <p class="post-meta">
+                        Category: <a class="post-category" href="/category/work.html">work</a> Tags:                                 <a class="post-category" href="/tag/ai.html">AI</a>
+                                <a class="post-category" href="/tag/engineering.html">Engineering</a>
+                        </p>
+                </header>
+            </section>
+            <h2>前言</h2>
+<p>最近很多人都在讨论 AI Coding。</p>
+<p>有的人觉得 AI 已经可以替代大量程序员，有的人觉得 AI 也就写写 Demo，真正进到生产系统里还是不敢用。两边看起来都在讲自己的真实经验，但结论差异很大。</p>
+<p>我觉得这里面有一个关键问题经常被忽略：</p>
+<p>大家讨论的不是同一个工程环境。</p>
+<p>如果一个团队需求不清楚、系统边界不清楚、测试不完整、部署靠人工、核心逻辑靠老员工口口相传，那么 AI 写出来的代码当然很难直接上线。不是 AI 完全不行，而是它拿不到足够的信息，也没有被放进一个可验证的工程闭环里。</p>
+<p>反过来，有些 AI Native 公司可以做到 80% 甚至更高比例的代码由 AI 产出，也不代表它们的工程能力弱，只是模型更强。很多时候恰恰相反：</p>
+<p>它们的软件工程能力更强。</p>
+<p>所以这个问题表面上是：</p>
+<p>为什么 AI 在有些公司只能写 Demo，在另一些公司却能写生产代码？</p>
+<p>本质上其实是：</p>
+<p>一个组织的软件工程体系，是否已经被结构化到可以让 AI 执行。</p>
+<p>AI 问题最后会回到软件工程问题。</p>
+<h2>先解释一下什么是 AI Native</h2>
+<p>AI Native 这个词现在被用得很多，但不同语境下含义不完全一样。</p>
+<p>我这里说的 AI Native，不是指“产品里加了一个 AI 功能”，也不是指“研发团队买了 Cursor、Copilot、Claude Code 之类的工具”。</p>
+<p>我更倾向于这样理解：</p>
+<p>AI Native 公司，是把 AI 当成组织生产方式的一部分，而不是当成某个外部工具。</p>
+<p>也就是说，它不是在原来的流程里加一个 AI 助手，而是会反过来重新设计产品表达、工程结构、测试体系、交付流程和组织协作方式，让 AI 能够稳定参与生产。</p>
+<p>传统公司常见的方式是：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>传统方式</th>
+<th>AI Native 更关注什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需求</td>
+<td>自然语言沟通，会议补上下文</td>
+<td>需求是否可执行、可验证</td>
+</tr>
+<tr>
+<td>设计</td>
+<td>依赖架构师和资深研发经验</td>
+<td>领域边界是否显性化</td>
+</tr>
+<tr>
+<td>开发</td>
+<td>人主导，AI 辅助写片段</td>
+<td>AI 执行，人设计约束</td>
+</tr>
+<tr>
+<td>测试</td>
+<td>手工测试 + 部分自动化</td>
+<td>自动验证作为默认门禁</td>
+</tr>
+<tr>
+<td>发布</td>
+<td>人判断风险，人操作兜底</td>
+<td>小步发布、监控、回滚闭环</td>
+</tr>
+</tbody>
+</table>
+<p>这里最重要的变化不是“谁写代码”，而是“系统能不能描述清楚自己”。</p>
+<p>完整工程本身就是一件极具专业度、难度和时间成本的事情。真正可上线的软件，不是把功能写出来就结束，而是要把需求、边界、异常、测试、发布、监控、回滚都纳入同一个工程闭环。</p>
+<p>这件事以前主要是为了让人协作，现在开始变成让 AI 协作的前提。</p>
+<h2>先看一张图</h2>
+<p>我理解 AI Coding 能不能进生产，大概可以拆成五层：</p>
+<p><center><img src="/images/2026/ai-native-harness-dataflow.svg" alt="ai-native-harness-dataflow" style="zoom: 86%;" /></center></p>
+<p>很多公司的问题，是直接从 CEO/战略层跳到最底层：</p>
+<p>“大家都用 AI 写代码。”</p>
+<p>但中间几层如果没有补起来，AI 最后只会变成一个更快的代码生成器，而不是一个稳定的工程生产力。</p>
+<p>可以用一个简化公式理解：</p>
+<div class="highlight"><pre><span></span><code>AI 有效产出
+≈ 模型能力 × 上下文完整度 × 约束清晰度 × 验证强度
+</code></pre></div>
+
+<p>这里面模型能力当然重要，但它不是唯一变量。</p>
+<p>更关键的是后面三个：</p>
+<ul>
+<li>上下文是否完整</li>
+<li>约束是否清楚</li>
+<li>验证是否足够强</li>
+</ul>
+<p>如果这三个很弱，模型越强，生成垃圾的速度也会越快。</p>
+<h2>为什么传统公司觉得 AI 只能写 Demo</h2>
+<p>很多研发对 AI Coding 的评价大概是这样的：</p>
+<ul>
+<li>会写 Hello World</li>
+<li>会生成 CRUD</li>
+<li>会写单文件工具函数</li>
+<li>项目稍微大一点就开始乱</li>
+<li>改一个地方容易影响三个地方</li>
+<li>代码看起来能跑，但不敢直接上线</li>
+</ul>
+<p>这些反馈都很真实。</p>
+<p>因为 Demo 和生产系统之间，差的不是几行代码，而是大量上下文。</p>
+<p>Demo 通常只有：</p>
+<div class="highlight"><pre><span></span><code>输入 -&gt; 输出
+</code></pre></div>
+
+<p>生产系统则是：</p>
+<div class="highlight"><pre><span></span><code>输入 -&gt; 业务约束 -&gt; 历史上下文 -&gt; 隐含规则 -&gt; 非功能要求 -&gt; 输出
+</code></pre></div>
+
+<p>这两者的信息密度差很多。</p>
+<p>举个登录的例子。</p>
+<p>如果让 AI 写一个“登录页面”，在 Demo 场景下很简单。邮箱、密码、按钮、调用接口、跳转页面，十几分钟就能生成一个看起来不错的页面。</p>
+<p>但真实生产系统里的登录，可能包括：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>需要考虑的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安全</td>
+<td>密码策略、失败次数限制、验证码、MFA、风控</td>
+</tr>
+<tr>
+<td>兼容</td>
+<td>SSO、老版本 App、移动端和 PC 差异</td>
+</tr>
+<tr>
+<td>体验</td>
+<td>错误提示、国际化、可访问性、弱网处理</td>
+</tr>
+<tr>
+<td>工程</td>
+<td>API 契约、埋点、日志、灰度、回滚</td>
+</tr>
+<tr>
+<td>合规</td>
+<td>审计日志、隐私数据处理、安全扫描</td>
+</tr>
+</tbody>
+</table>
+<p>如果这些信息没有结构化表达，AI 只能根据通用经验猜。猜对了是运气，猜错了就是事故。</p>
+<p>这也是为什么很多 CEO 会觉得：</p>
+<p>“模型还不够强，再等等 GPT-6。”</p>
+<p>但技术团队感受到的往往是：</p>
+<p>“不是模型问题，是工程问题。”</p>
+<p>模型当然还会进步，但真实生产系统里最难的不是生成代码，而是知道哪些代码不能生成、哪些地方不能改、哪些约束必须满足。</p>
+<p>AI 真正困难的是：</p>
+<p>它不知道系统边界。</p>
+<h2>AI 代码比例取决于系统可描述程度</h2>
+<p>我觉得可以用一个简单的关系来理解：</p>
+<div class="highlight"><pre><span></span><code>AI 代码生成比例 ≈ 系统可描述程度
+</code></pre></div>
+
+<p>或者说：</p>
+<div class="highlight"><pre><span></span><code>Code Generation Ratio ≈ Specification Completeness
+</code></pre></div>
+
+<p>系统越规范，AI 越容易发挥作用。</p>
+<p>系统越依赖人脑默契，AI 越难稳定落地。</p>
+<p>很多传统公司的真实情况是这样的：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>表达</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产品</td>
+<td>“把登录页改得高级一点。”</td>
+</tr>
+<tr>
+<td>研发</td>
+<td>“高级是指什么？”</td>
+</tr>
+<tr>
+<td>产品</td>
+<td>“参考一下竞品，交互更顺一点。”</td>
+</tr>
+<tr>
+<td>研发</td>
+<td>“参考哪个页面？移动端还是 PC 端？现有接口要不要改？登录失败怎么提示？”</td>
+</tr>
+<tr>
+<td>产品</td>
+<td>“你们先做一版看看。”</td>
+</tr>
+</tbody>
+</table>
+<p>这时候人都很难一次做对，更不用说 AI。</p>
+<p>因为这里没有可执行约束。</p>
+<p>很多人一听到结构化表达，就会想到写一大段 YAML。YAML 可以用，但不是唯一形式，也不是最适合所有团队的形式。</p>
+<p>更落地的表达，往往是下面这些东西：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>例子</th>
+<th>AI 为什么需要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PRD 验收标准</td>
+<td>成功/失败场景、边界条件、不可做范围</td>
+<td>避免只实现主路径</td>
+</tr>
+<tr>
+<td>接口契约</td>
+<td>入参、出参、错误码、兼容策略</td>
+<td>避免破坏上下游</td>
+</tr>
+<tr>
+<td>数据字典</td>
+<td>字段口径、枚举值、敏感级别</td>
+<td>避免误用字段</td>
+</tr>
+<tr>
+<td>测试清单</td>
+<td>单测、集成、回归、性能、安全</td>
+<td>判断代码能否上线</td>
+</tr>
+<tr>
+<td>架构决策记录</td>
+<td>为什么这么设计，哪些方案被放弃</td>
+<td>避免重复踩坑</td>
+</tr>
+<tr>
+<td>发布 Checklist</td>
+<td>灰度、监控、回滚、通知</td>
+<td>控制生产风险</td>
+</tr>
+</tbody>
+</table>
+<p>所以重点不是把一切写成 YAML，而是把信息从“人脑默契”变成“可读取、可执行、可验证”的工程资产。</p>
+<h2>大部分公司的短板不是 AI，而是软件工程基础</h2>
+<p>很多公司过去这些年都在讲敏捷、TDD、DDD、微服务、DevOps，但真正落地的时候，经常会走样。</p>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>理想状态</th>
+<th>走样后的状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>敏捷</td>
+<td>小步迭代，持续反馈</td>
+<td>需求天天改</td>
+</tr>
+<tr>
+<td>TDD</td>
+<td>用测试约束设计</td>
+<td>上线前补测试截图</td>
+</tr>
+<tr>
+<td>微服务</td>
+<td>领域边界清晰，独立演进</td>
+<td>几十个服务互相调，谁也说不清边界</td>
+</tr>
+<tr>
+<td>DDD</td>
+<td>用领域模型管理复杂度</td>
+<td>包名里有一个 domain</td>
+</tr>
+<tr>
+<td>DevOps</td>
+<td>交付链路自动化、可追踪</td>
+<td>研发自己登录机器发布</td>
+</tr>
+</tbody>
+</table>
+<p>这些东西在人主导的时代，有时候还能靠经验、责任心和加班撑住。但到了 AI 参与开发的时候，问题会被放大。</p>
+<p>因为 AI 依赖可观察性。</p>
+<p>它需要知道：</p>
+<ul>
+<li>当前系统有哪些模块</li>
+<li>这个模块的边界在哪里</li>
+<li>哪些接口可以改，哪些不能改</li>
+<li>哪些测试必须通过</li>
+<li>哪些规则是业务核心约束</li>
+<li>哪些历史代码不能轻易动</li>
+<li>出问题后如何回滚</li>
+</ul>
+<p>但很多企业的真实信息分布在：</p>
+<ul>
+<li>飞书聊天记录</li>
+<li>Jira 或其他任务系统</li>
+<li>Confluence 文档</li>
+<li>代码注释</li>
+<li>老员工脑子</li>
+<li>临时会议纪要</li>
+<li>微信群</li>
+</ul>
+<p>这些信息没有形成一个统一、可执行、可验证的上下文。</p>
+<p>所以当你问 AI：</p>
+<p>“帮我改一下订单逻辑。”</p>
+<p>它真正需要知道的是：</p>
+<ul>
+<li>订单状态机有哪些状态</li>
+<li>支付、库存、履约、发票、售后之间怎么协作</li>
+<li>取消订单会不会释放库存</li>
+<li>优惠券是否退回</li>
+<li>已部分发货的订单能不能取消</li>
+<li>下游有没有异步消息</li>
+<li>历史上为什么有一段特殊判断</li>
+<li>哪些场景有合同测试</li>
+<li>改完之后要跑哪些回归</li>
+</ul>
+<p>如果这些信息拿不到，AI 只能在代码表面做模式匹配。</p>
+<p>这就是为什么很多 AI 改代码看起来很努力，但结果不稳定。</p>
+<p>不是它不会写语法，而是它没有完整系统地图。</p>
+<h2>Harness Engineering 的价值</h2>
+<p>这两年我觉得一个很值得关注的概念是 Harness Engineering。</p>
+<p>很多人过去讲 Prompt Engineering，重点是怎么把提示词写好。这个当然有价值，但如果只停留在提示词层面，很容易变成玄学。</p>
+<p>Harness Engineering 更像是：</p>
+<p>把 AI 放进一个受约束、可执行、可验证的工程环境。</p>
+<p>它关注的不是一句 prompt 写得多漂亮，而是 AI 执行任务时，周围有没有完整的支架。</p>
+<p>可以简单理解成：</p>
+<div class="highlight"><pre><span></span><code>AI + Context + Tool + Verification + Feedback
+</code></pre></div>
+
+<p>也就是：</p>
+<p>需求进入系统以后，AI 能拿到必要上下文，能调用合适工具，能生成变更，能自动跑测试和检查，能根据反馈继续修正，最后由人做关键判断。</p>
+<p>核心不是生成。</p>
+<p>核心是控制。</p>
+<p>如果只是写：</p>
+<div class="highlight"><pre><span></span><code>帮我写一个支付模块。
+</code></pre></div>
+
+<p>这更像 Demo。</p>
+<p>如果是：</p>
+<div class="highlight"><pre><span></span><code>在现有 payment-service 中增加分账能力。
+
+约束：
+1. 不允许修改 payment-core 模块的公开接口。
+2. 必须复用现有 PaymentOrder、LedgerEntry、SettlementBatch 模型。
+3. 分账比例来自 settlement_rule 表。
+4. 金额计算使用 Money 类型，禁止使用 double。
+5. 需要覆盖正常分账、部分退款、分账失败重试三个场景。
+6. 单元测试覆盖率不低于 90%。
+7. 必须通过 contract test、lint、安全扫描和回归测试。
+8. 不允许修改账务历史表结构。
+</code></pre></div>
+
+<p>这就开始接近生产。</p>
+<p>再往下，还需要把这些约束接到自动化流程里：</p>
+<table>
+<thead>
+<tr>
+<th>验证环节</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lint / format</td>
+<td>保证基础代码规范</td>
+</tr>
+<tr>
+<td>unit test</td>
+<td>约束局部逻辑</td>
+</tr>
+<tr>
+<td>integration test</td>
+<td>验证模块协同</td>
+</tr>
+<tr>
+<td>contract test</td>
+<td>防止破坏上下游契约</td>
+</tr>
+<tr>
+<td>e2e test</td>
+<td>覆盖核心用户路径</td>
+</tr>
+<tr>
+<td>benchmark</td>
+<td>控制性能退化</td>
+</tr>
+<tr>
+<td>security scan</td>
+<td>控制安全风险</td>
+</tr>
+<tr>
+<td>schema diff</td>
+<td>控制数据结构变更风险</td>
+</tr>
+<tr>
+<td>canary / rollback</td>
+<td>控制线上影响范围</td>
+</tr>
+</tbody>
+</table>
+<p>AI 在这个环境里才可能稳定工作。</p>
+<p>所以 Harness Engineering 本质上是：</p>
+<p>把软件工程变成机器可执行规则。</p>
+<p>它不是 Prompt Engineering 的替代，而是 Prompt Engineering 的工业化版本。</p>
+<h2>一个大数据场景下的例子：指标口径变更</h2>
+<p>前面的登录和订单例子更偏业务系统。换到大数据场景，AI 面临的问题会更明显。</p>
+<p>假设产品或运营提了一个需求：</p>
+<p>“把用户活跃指标优化一下，之前的 DAU 不太准。”</p>
+<p>这句话看起来很简单，但真正落到数据平台里，可能涉及一整条链路：</p>
+<div class="highlight"><pre><span></span><code>埋点 -&gt; Kafka -&gt; ODS -&gt; DWD -&gt; DWS -&gt; ADS -&gt; BI 报表 -&gt; 业务决策
+</code></pre></div>
+
+<p>如果让 AI 直接改 SQL，它大概率能写出一段能跑的 SQL。</p>
+<p>但能跑不代表能上线。</p>
+<p>因为这里真正难的是口径、血缘、成本和稳定性。</p>
+<h3>先把问题拆开</h3>
+<p>一个“DAU 口径调整”至少要问清楚：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>需要澄清的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>业务口径</td>
+<td>什么叫活跃？打开 App 算不算？后台心跳算不算？爬虫流量算不算？</td>
+</tr>
+<tr>
+<td>数据来源</td>
+<td>使用客户端埋点、服务端日志，还是登录表？哪个是准源？</td>
+</tr>
+<tr>
+<td>去重规则</td>
+<td>按 user_id、device_id，还是账号体系映射后的统一 user_key？</td>
+</tr>
+<tr>
+<td>时间窗口</td>
+<td>按自然日、用户时区，还是业务所在地区时区？</td>
+</tr>
+<tr>
+<td>延迟容忍</td>
+<td>T+1 出数，还是小时级更新？迟到数据怎么处理？</td>
+</tr>
+<tr>
+<td>历史回刷</td>
+<td>是否要重刷过去 30 天、180 天，还是只从新口径生效日开始？</td>
+</tr>
+<tr>
+<td>下游影响</td>
+<td>哪些报表、标签、推荐、运营策略依赖这个指标？</td>
+</tr>
+<tr>
+<td>验证方式</td>
+<td>新旧口径差异多少合理？异常波动如何解释？</td>
+</tr>
+</tbody>
+</table>
+<p>这些问题不澄清，AI 写得越快，风险越大。</p>
+<p>因为指标不是一段 SQL，而是一种业务契约。</p>
+<h3>更落地的表达，不一定是 YAML</h3>
+<p>在大数据团队里，真正能让 AI 稳定工作的输入，可能更像下面这些材料。</p>
+<p><strong>1. 指标定义表</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>指标名称</td>
+<td>DAU</td>
+</tr>
+<tr>
+<td>指标英文名</td>
+<td>daily_active_user</td>
+</tr>
+<tr>
+<td>统计粒度</td>
+<td>day</td>
+</tr>
+<tr>
+<td>统计对象</td>
+<td>user_key</td>
+</tr>
+<tr>
+<td>活跃定义</td>
+<td>当天产生有效前台行为事件的用户</td>
+</tr>
+<tr>
+<td>排除条件</td>
+<td>测试账号、爬虫、后台心跳、重复上报</td>
+</tr>
+<tr>
+<td>数据源</td>
+<td>dwd_user_event_di</td>
+</tr>
+<tr>
+<td>产出表</td>
+<td>ads_user_active_di</td>
+</tr>
+<tr>
+<td>SLA</td>
+<td>次日 08:00 前完成</td>
+</tr>
+<tr>
+<td>责任人</td>
+<td>数据产品、数据研发、业务 owner</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2. 口径变更记录</strong></p>
+<table>
+<thead>
+<tr>
+<th>日期</th>
+<th>变更内容</th>
+<th>影响范围</th>
+<th>是否回刷</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-15</td>
+<td>排除 heartbeat 事件</td>
+<td>DAU、留存、漏斗</td>
+<td>回刷 90 天</td>
+<td>与运营报表同步</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3. 数据质量规则</strong></p>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>阈值</th>
+<th>失败处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DAU 日环比波动</td>
+<td>不超过 20%</td>
+<td>阻断发布，人工确认</td>
+</tr>
+<tr>
+<td>user_key 为空占比</td>
+<td>小于 0.1%</td>
+<td>阻断发布</td>
+</tr>
+<tr>
+<td>分区产出时间</td>
+<td>08:00 前</td>
+<td>告警</td>
+</tr>
+<tr>
+<td>新旧口径差异</td>
+<td>需要输出对比报告</td>
+<td>人工确认后切换</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. 下游血缘清单</strong></p>
+<table>
+<thead>
+<tr>
+<th>下游对象</th>
+<th>类型</th>
+<th>负责人</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户增长看板</td>
+<td>BI 报表</td>
+<td>运营分析</td>
+<td>指标数值变化</td>
+</tr>
+<tr>
+<td>留存分析任务</td>
+<td>离线任务</td>
+<td>数据研发</td>
+<td>依赖 DAU 作为分母</td>
+</tr>
+<tr>
+<td>用户分层标签</td>
+<td>标签任务</td>
+<td>算法团队</td>
+<td>活跃等级可能变化</td>
+</tr>
+<tr>
+<td>经营周报</td>
+<td>固定报表</td>
+<td>数据产品</td>
+<td>需要解释口径变更</td>
+</tr>
+</tbody>
+</table>
+<p>这些东西比一大段 YAML 更容易被团队接受，也更符合日常工作方式。</p>
+<p>AI 可以基于这些材料去做几类事情：</p>
+<ul>
+<li>修改 SQL</li>
+<li>更新调度配置</li>
+<li>生成回刷脚本</li>
+<li>补充数据质量规则</li>
+<li>生成新旧口径对比报告</li>
+<li>更新指标文档</li>
+<li>找出下游影响范围</li>
+<li>给发布 Checklist 生成待办项</li>
+</ul>
+<p>但前提是这些材料真实存在，而且格式相对稳定。</p>
+<h3>AI 在这里真正应该做什么</h3>
+<p>一个比较合理的 AI 执行链路可能是：</p>
+<div class="highlight"><pre><span></span><code>读取指标定义
+-&gt; 分析血缘影响
+-&gt; 修改 DWD/DWS/ADS SQL
+-&gt; 增加数据质量规则
+-&gt; 生成回刷计划
+-&gt; 跑样本分区验证
+-&gt; 输出新旧口径对比
+-&gt; 人工确认
+-&gt; 灰度切换报表
+</code></pre></div>
+
+<p>这和“帮我改一下 DAU SQL”完全不是一个量级。</p>
+<p>后者是 Demo。</p>
+<p>前者才是工程。</p>
+<h3>为什么大数据场景更能说明问题</h3>
+<p>大数据系统里，很多风险不是代码编译失败，而是结果悄悄错了。</p>
+<p>服务端接口错了，可能很快报 500；数据口径错了，可能一个月后才发现经营分析偏了、运营策略错了、模型训练数据污染了。</p>
+<p>所以数据工程里的 AI Native，不是让 AI 多写几段 SQL，而是让 AI 进入更完整的数据工程闭环：</p>
+<div class="highlight"><pre><span></span><code>数据源 -&gt; 元数据 -&gt; 血缘 -&gt; 口径 -&gt; 质量 -&gt; 调度 -&gt; 成本 -&gt; 发布 -&gt; 反馈
+</code></pre></div>
+
+<p>这里每一层都需要专业判断，也都需要时间沉淀。元数据要治理，血缘要可信，质量规则要持续维护，历史任务要梳理，下游依赖要有人负责。</p>
+<p>这也是为什么完整工程很难。</p>
+<p>不是因为大家不会写 SQL，而是因为让 SQL 变成稳定的数据产品，本身就是复杂工程。</p>
+<h2>原来的业务系统例子也可以保留</h2>
+<p>如果换回业务系统，订单取消也是一个很典型的例子。</p>
+<p>产品可能只说：</p>
+<p>“用户下单后，增加一个取消订单功能。”</p>
+<p>但订单取消不是一个按钮，而是一组业务约束。</p>
+<p>至少要说清楚：</p>
+<ul>
+<li>哪些订单状态允许取消</li>
+<li>支付前取消和支付后取消是否不同</li>
+<li>是否需要释放库存</li>
+<li>优惠券是否返还</li>
+<li>积分是否返还</li>
+<li>已发货是否允许取消</li>
+<li>部分发货是否允许取消</li>
+<li>取消后是否触发退款</li>
+<li>退款失败怎么办</li>
+<li>是否通知商家</li>
+<li>是否通知履约系统</li>
+<li>是否写审计日志</li>
+</ul>
+<p>如果这些都没有，AI 生成的代码可能只是：</p>
+<div class="highlight"><pre><span></span><code><span class="n">order</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;cancelled&quot;</span>
+<span class="n">order</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</code></pre></div>
+
+<p>这就是 Demo。</p>
+<p>如果系统里已经有明确的状态机、领域边界、事件规范、合同测试，AI 才有机会在可控范围里实现它。</p>
+<p>所以这个例子和大数据指标变更本质是一样的：</p>
+<p>AI 不是不能写代码，而是不能在没有边界、没有上下文、没有验证的情况下稳定写生产代码。</p>
+<h2>被筛选的不是程序员，而是软件建模能力</h2>
+<p>这也是我觉得很多讨论容易跑偏的地方。</p>
+<p>大家经常问：</p>
+<p>AI 会不会替代程序员？</p>
+<p>这个问题太大，也太粗。</p>
+<p>更具体一点，未来被压缩的可能是低约束、低上下文、低复杂度的编码工作。但真正被放大的，是抽象能力、系统建模能力、约束设计能力和工程判断力。</p>
+<p>以前评价一个工程师，可能更容易看：</p>
+<ul>
+<li>写代码快不快</li>
+<li>bug 多不多</li>
+<li>算法熟不熟</li>
+<li>框架会不会</li>
+<li>能不能独立完成模块</li>
+</ul>
+<p>这些能力仍然重要，但未来可能不够了。</p>
+<p>因为代码会越来越便宜。</p>
+<p>约束会越来越贵。</p>
+<p>以前工程师主要写代码：</p>
+<div class="highlight"><pre><span></span><code>Coder
+</code></pre></div>
+
+<p>现在优秀工程师越来越像：</p>
+<div class="highlight"><pre><span></span><code>Architect
+</code></pre></div>
+
+<p>未来可能更接近：</p>
+<div class="highlight"><pre><span></span><code>System Designer
+AI Supervisor
+</code></pre></div>
+
+<p>这不是说所有人都不写代码了，而是说写代码不再是唯一核心动作。</p>
+<p>工程师要能把一个系统描述成 AI 可以理解和执行的结构。</p>
+<p>比如在数据平台里，不只是写一个任务，而是要定义：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>需要建模的内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据源</td>
+<td>来源、刷新频率、可信等级</td>
+</tr>
+<tr>
+<td>数据模型</td>
+<td>ODS、DWD、DWS、ADS 分层关系</td>
+</tr>
+<tr>
+<td>口径</td>
+<td>指标定义、枚举解释、过滤条件</td>
+</tr>
+<tr>
+<td>血缘</td>
+<td>上下游表、任务、报表、接口</td>
+</tr>
+<tr>
+<td>质量</td>
+<td>完整性、唯一性、及时性、波动规则</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>扫描量、存储量、调度周期</td>
+</tr>
+<tr>
+<td>风险</td>
+<td>回刷影响、下游影响、回滚方式</td>
+</tr>
+</tbody>
+</table>
+<p>这背后考验的不是语法，而是建模。</p>
+<p>你能不能把复杂业务拆成稳定边界。</p>
+<p>你能不能定义清楚什么可以变，什么不能变。</p>
+<p>你能不能让测试体系覆盖真正的风险。</p>
+<p>你能不能把隐含知识沉淀成显性规则。</p>
+<p>这些能力，才是 AI 时代更稀缺的工程能力。</p>
+<h2>国内很多公司的短板在产品和组织</h2>
+<p>很多时候，AI 落不下去，不只是研发的问题。</p>
+<p>产品能力和组织能力同样关键。</p>
+<p>软件开发本质上不是写代码，而是压缩信息熵。</p>
+<p>一个模糊需求进入系统时，里面有大量不确定性。好的产品和技术团队，要把这些不确定性逐步压缩成可以执行、可以验证、可以交付的东西。</p>
+<p>但很多公司的需求表达仍然是：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>表达</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>老板</td>
+<td>“加个 AI 功能。”</td>
+</tr>
+<tr>
+<td>产品</td>
+<td>“用户觉得现在不够智能。”</td>
+</tr>
+<tr>
+<td>研发</td>
+<td>“智能体现在哪里？”</td>
+</tr>
+<tr>
+<td>产品</td>
+<td>“就是体验要更好一点。”</td>
+</tr>
+</tbody>
+</table>
+<p>这种情况下，AI 没有办法执行。</p>
+<p>因为它拿到的不是需求，而是情绪。</p>
+<p>更好的表达应该是：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>更可执行的表达</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>目标</td>
+<td>搜索到详情页点击率提升 8%</td>
+</tr>
+<tr>
+<td>场景</td>
+<td>用户用自然语言搜索商品</td>
+</tr>
+<tr>
+<td>当前问题</td>
+<td>关键词搜索无法覆盖长尾意图</td>
+</tr>
+<tr>
+<td>范围</td>
+<td>做 query rewrite、意图识别、结果解释</td>
+</tr>
+<tr>
+<td>不做</td>
+<td>不重构完整推荐系统</td>
+</tr>
+<tr>
+<td>主指标</td>
+<td>search_to_detail_click_rate、search_to_order_conversion</td>
+</tr>
+<tr>
+<td>护栏指标</td>
+<td>p95 延迟 &lt; 300ms，无结果率不升高</td>
+</tr>
+</tbody>
+</table>
+<p>这才是 AI 可以参与的表达。</p>
+<p>所以我觉得很多公司真正要补的，不只是 AI 工具，而是结构化能力。</p>
+<p>产品要能把“我要高级”变成场景、指标、边界和验收标准。</p>
+<p>研发要能把“帮我做一下”变成领域模型、接口契约、测试和发布约束。</p>
+<p>管理者要能把“大家都用 AI”变成流程、基座、工具链和评价体系。</p>
+<p>否则全员 AI Coding 很容易变成全员生成更多不可维护代码。</p>
+<h2>未来软件公司可能会分层</h2>
+<p>未来几年，软件公司在使用 AI 开发上可能会出现几层差异。</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>特征</th>
+<th>AI 代码比例</th>
+<th>核心瓶颈</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 增强传统公司</td>
+<td>使用 Copilot、Cursor、ChatGPT 等个人工具</td>
+<td>20% - 40%</td>
+<td>上下文和验证不足</td>
+</tr>
+<tr>
+<td>Harness 公司</td>
+<td>有自动测试、Agent、CI 门禁、规范约束</td>
+<td>50% - 90%</td>
+<td>工程体系建设成本</td>
+</tr>
+<tr>
+<td>AI Native 公司</td>
+<td>需求、工程、验证、反馈围绕 AI 重构</td>
+<td>90%+</td>
+<td>组织和系统建模能力</td>
+</tr>
+</tbody>
+</table>
+<p>第一层是现在最多的。</p>
+<p>团队使用 AI 工具补代码、写测试、解释代码、生成脚本、做局部重构。效率会提升，但整体开发模式没有本质变化。</p>
+<p>第二层会开始把 AI 放进工程体系。</p>
+<p>AI 不只是一个编辑器里的助手，而是被接入到需求拆解、代码生成、测试修复、文档更新、发布检查等流程中。</p>
+<p>第三层更进一步。</p>
+<p>代码本身不再是最核心资产，代码更像是某种编译产物。</p>
+<p>真正的资产是：</p>
+<ul>
+<li>数据</li>
+<li>工作流</li>
+<li>领域规则</li>
+<li>用户反馈</li>
+<li>产品抽象</li>
+<li>工程约束</li>
+<li>Harness</li>
+</ul>
+<p>这种公司才有机会达到 90% 甚至更高比例的 AI 代码产出。</p>
+<p>但这并不意味着工程要求降低。</p>
+<p>恰恰相反，它要求软件工程更严格。</p>
+<h2>一个可能有争议的判断</h2>
+<p>很多 CEO 现在推动的是：</p>
+<p>全员 AI Coding。</p>
+<p>这个方向没有错，但我觉得更底层的目标应该是：</p>
+<p>全员结构化。</p>
+<p>因为没有结构，AI 越强，制造垃圾的速度越快。</p>
+<p>过去软件行业二十年，很多工程实践本质上是在解决一个问题：</p>
+<p>如何让人更好地协作。</p>
+<p>比如：</p>
+<ul>
+<li>敏捷</li>
+<li>TDD</li>
+<li>DDD</li>
+<li>DevOps</li>
+<li>CI/CD</li>
+<li>Code Review</li>
+<li>架构治理</li>
+<li>可观测性</li>
+</ul>
+<p>未来十年，可能要解决另一个问题：</p>
+<p>如何让 AI 更好地协作。</p>
+<p>而答案不是简单等一个更大的模型。</p>
+<p>更大的模型会提高上限，但如果工程系统本身混乱，它也只是更快地撞墙。</p>
+<p>真正需要补的是：</p>
+<ul>
+<li>更清晰的产品抽象</li>
+<li>更稳定的领域模型</li>
+<li>更明确的工程边界</li>
+<li>更完整的测试体系</li>
+<li>更可执行的开发约束</li>
+<li>更自动化的验证反馈</li>
+<li>更成熟的组织协作方式</li>
+</ul>
+<p>这些东西以前叫工程最佳实践。</p>
+<p>在 AI 时代，它们会变成新的生产资料。</p>
+<p>甚至可以说，它们正在变成 AI 时代的软件编译器。</p>
+<h2>最后</h2>
+<p>所以回到一开始的问题：</p>
+<p>为什么同样是 AI，有些公司只能生成 Demo，而另一些 AI Native 公司已经可以让 AI 写大部分代码？</p>
+<p>我的理解是：</p>
+<p>差距不只在模型。</p>
+<p>更大的差距在于软件工程体系本身。</p>
+<p>AI Native 公司不是跳过了软件工程，而是把软件工程推到了更极致。</p>
+<p>它们不是让 AI 在混乱里自由发挥，而是把需求、架构、规则、测试、工具、反馈都结构化，让 AI 在一个可控环境里执行。</p>
+<p>这对传统公司反而是一个很现实的提醒：</p>
+<p>不要只盯着“买哪个 AI 工具”。</p>
+<p>更重要的是问自己：</p>
+<ul>
+<li>产品需求能不能结构化</li>
+<li>领域模型是否清晰</li>
+<li>系统边界是否明确</li>
+<li>测试能不能兜住风险</li>
+<li>发布能不能自动验证</li>
+<li>文档和上下文能不能被机器读取</li>
+<li>组织知识是否还只存在于少数人脑子里</li>
+</ul>
+<p>这些问题不解决，AI Coding 很容易停留在 Demo 和局部提效。</p>
+<p>这些问题逐步解决，AI 才可能真正进入生产系统。</p>
+<p>代码会越来越便宜，但好系统不会自动变多。</p>
+<p>未来真正稀缺的，可能不是会不会让 AI 写代码，而是有没有能力把一个复杂系统描述清楚，并让它持续、稳定、可验证地演进。</p>
+            <section id="copyright">
+            <center>
+                <div class="copyright">
+                    版权声明：自由转载-非商用-非衍生-保持署名
+                </div>
+                <!--div class="donation">
+                    <img src="/images/donation.png"/>
+                    <br>
+                    <strong> 如果你觉得我的文章或项目对你有所帮助, You can buy me a cup of coffee:) </strong>
+                </div-->
+            </center>
+            </section>
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "nexrol"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; Z晓L's Blog &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+</body>
+</html>

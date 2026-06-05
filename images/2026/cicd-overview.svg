@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="620" viewBox="0 0 1380 620" role="img" aria-labelledby="title desc">
+  <title id="title">GitLab Runner + GitOps 的 CI/CD 总览</title>
+  <desc id="desc">Pipeline from GitLab repository to GitLab Runner, CI scripts, GitOps config, compose deployment, target environments, and notification.</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #1f2933; }
+      .box-title { font: 700 21px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #1f2933; }
+      .box-text { font: 400 16px "PingFang SC", "Microsoft YaHei", Arial, sans-serif; fill: #3e4c59; }
+      .blue { fill: #d0ebff; stroke: #1971c2; }
+      .green { fill: #d3f9d8; stroke: #087f5b; }
+      .yellow { fill: #ffec99; stroke: #e67700; }
+      .red { fill: #ffc9c9; stroke: #c92a2a; }
+      .box { stroke-width: 2.4; rx: 8; }
+      .arrow { stroke: #52616b; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 7 7; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#52616b"/>
+    </marker>
+  </defs>
+  <rect width="1380" height="620" fill="#fbfcfe"/>
+  <text class="title" x="430" y="54">GitLab Runner + GitOps 的 CI/CD 总览</text>
+
+  <rect class="box blue" x="40" y="150" width="180" height="84"/>
+  <text class="box-title" x="84" y="183">代码提交</text>
+  <text class="box-text" x="76" y="210">GitLab 仓库</text>
+
+  <rect class="box green" x="290" y="125" width="260" height="134"/>
+  <text class="box-title" x="350" y="164">GitLab Runner</text>
+  <text class="box-text" x="328" y="196">预装 JDK / Maven / Gradle</text>
+  <text class="box-text" x="350" y="222">Node / Docker / SSH</text>
+
+  <rect class="box green" x="620" y="150" width="170" height="84"/>
+  <text class="box-title" x="660" y="183">统一入口</text>
+  <text class="box-text" x="675" y="210">run.sh</text>
+
+  <rect class="box yellow" x="620" y="315" width="170" height="92"/>
+  <text class="box-title" x="670" y="350">env.sh</text>
+  <text class="box-text" x="650" y="378">环境 / 项目 / 应用</text>
+
+  <rect class="box green" x="870" y="125" width="230" height="134"/>
+  <text class="box-title" x="928" y="164">CI 脚本分流</text>
+  <text class="box-text" x="918" y="196">web / java / java11</text>
+  <text class="box-text" x="902" y="222">java-jib / kotlin / python</text>
+
+  <rect class="box blue" x="870" y="325" width="230" height="98"/>
+  <text class="box-title" x="928" y="360">镜像 + GitOps</text>
+  <text class="box-text" x="902" y="388">更新 image 并提交变更</text>
+
+  <rect class="box green" x="1160" y="325" width="190" height="98"/>
+  <text class="box-title" x="1200" y="360">compose.sh</text>
+  <text class="box-text" x="1198" y="388">按配置部署</text>
+
+  <rect class="box yellow" x="1160" y="150" width="190" height="92"/>
+  <text class="box-title" x="1208" y="185">目标环境</text>
+  <text class="box-text" x="1200" y="214">dev / gray / pro</text>
+
+  <rect class="box red" x="620" y="485" width="170" height="82"/>
+  <text class="box-title" x="657" y="518">Feishu 通知</text>
+  <text class="box-text" x="641" y="544">开始 / 成功 / 失败</text>
+
+  <path class="arrow" d="M220 192 L290 192"/>
+  <path class="arrow" d="M550 192 L620 192"/>
+  <path class="arrow" d="M705 234 L705 315"/>
+  <path class="arrow" d="M790 192 L870 192"/>
+  <path class="arrow" d="M985 259 L985 325"/>
+  <path class="arrow" d="M1100 374 L1160 374"/>
+  <path class="arrow" d="M1255 325 L1255 242"/>
+  <path class="arrow dash" d="M705 234 L705 485"/>
+</svg>

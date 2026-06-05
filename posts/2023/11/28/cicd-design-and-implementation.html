@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Z晓L's Blog, welcome to my nerverland">
+
+
+        <title>基于GitLab Runner的CI/CD 实践：从发布流程到 GitOps // Z晓L's Blog // welcome to my nerverland</title>
+
+    <link href="/favicon.ico" rel="icon">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/solarized.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QL28PSLX3Z"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+
+       gtag('config', 'G-QL28PSLX3Z');
+    </script>
+</head>
+
+<body>
+<div class="pure-g-r" id="layout">
+    <div class="sidebar sidebar-article pure-u">
+        <header class="header-article">
+            <hgroup>
+                <a href="/author/nexrol.html" title="See posts by nexrol">
+                </a>
+                <h2 class="article-info">nexrol</h2>
+                <!--small class="about-author"></small-->
+                <p class="social">
+                        <a href="#">
+                            <i class="fa fa-github fa-lg"></i>
+                        </a>
+                        <a href="http://weibo.com/shadowlg">
+                            <i class="fa fa-weibo fa-lg"></i>
+                        </a>
+                        <a href="#">
+                            <i class="fa fa-envelope fa-lg"></i>
+                        </a>
+                        <a href="#">
+                            <i class="fa fa-rss-square fa-lg"></i>
+                        </a>
+                </p>
+                <h5>Published</h5>
+                <p>二 28 十一月 2023</p>
+                <a href="/">&larr;Home</a>
+            </hgroup>
+        </header>
+    </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>基于GitLab Runner的CI/CD 实践：从发布流程到 GitOps</h1>
+                        <p class="post-meta">
+                        Category: <a class="post-category" href="/category/work.html">work</a> Tags:                                 <a class="post-category" href="/tag/cicd.html">CICD</a>
+                                <a class="post-category" href="/tag/devops.html">DevOps</a>
+                                <a class="post-category" href="/tag/gitops.html">GitOps</a>
+                                <a class="post-category" href="/tag/gitlab.html">GitLab</a>
+                        </p>
+                </header>
+            </section>
+            <h2>前言</h2>
+<p>这篇文章整理一下之前工作里 CI/CD 这块做的事情。</p>
+<p>为什么要做，做技术的大概都有类似感受。</p>
+<p>一开始团队规模不大，发布这件事往往不会被单独拿出来设计。大家知道代码在哪，知道哪台机器要发，靠几个熟悉系统的人就能把事情推进下去。</p>
+<p>早期这样其实没什么问题。但项目一多，技术栈一多，环境一多，发布就慢慢从"日常操作"变成"隐性风险"了。</p>
+<p>当时工程的情况大概是这样：</p>
+<ul>
+<li>前端、Java、Kotlin、Python 等不同类型项目并存</li>
+<li>dev、gray、prod 等多套环境都要维护</li>
+<li>发布动作不只是构建，还包括镜像、配置、部署、通知</li>
+<li>有些项目需要快速迭代，有些项目又必须稳定可控</li>
+</ul>
+<p>继续靠人手动处理，短期还能顶住，长期却是负担。所以后面把发布过程按照 GitOps 的思路做成了一套依赖 GitLab Runner 执行、基于 Git 管理部署的系统流程。</p>
+<h2>没有统一 CI/CD 之前的问题</h2>
+<p>发布这个事情，在没有技术经验的人看来可能想象不到会有多少的难度和复杂性，这也往往是基础设施建设所承担的，然而这类事情在技术和组织发展到一定阶段，从长远来看是一定需要做的，事关效率的提升问题。</p>
+<h3>发布路径越来越多</h3>
+<p>项目少的时候，每个项目有自己的发布方式还能接受。一个项目登录机器 <code>git pull</code>，一个项目本地打包再上传，另一个项目先改镜像再手动重启，看起来都能跑。</p>
+<p>项目一多涉及到的负担就不一样了，比如：
+- 每个项目有不同的发布命令
+- 每个环境有不同的操作步骤
+- 有的改了镜像，有的改了配置，有的什么记录都没有</p>
+<p>由于团队里没有一条统一的交付路径，随着时间推移，每多一个项目，就多了一套需要记忆和维护的手工流程。</p>
+<h3>发布依赖个人经验</h3>
+<p>流程写在文档里是一回事，真正执行时能不能顺是另一回事。</p>
+<p>很多发布动作看起来简单，但里面夹杂着经验：这个服务要先发，那个配置要后改，这个环境要等几分钟，那个机器不能随便重启。</p>
+<p>一旦这些经验只存在于某几个人脑子里，发布就不是流程，而是经验复用。新人接手成本高，同样的动作不同人执行结果不一致，没有流程记录，出问题后也很难还原当时到底做了什么。</p>
+<h3>版本和部署对不上</h3>
+<p>镜像仓库里有新 tag，但部署配置没同步更新，或者线上实际运行版本没落到 Git 管理里，后面就很难回答这几个问题：</p>
+<ul>
+<li>当前环境到底运行的是哪个版本</li>
+<li>上一次发布改了哪些服务</li>
+<li>为什么镜像有了，但环境没生效</li>
+<li>真要回滚时，应该回到哪个版本</li>
+</ul>
+<h3>权限和反馈缺失</h3>
+<p>没有统一发布流程时，每个人都要登录机器、每个项目都要维护一套服务器操作方式、每个人都有全部的权限，或者各种权限等环境配置乱飞在不同的地方。</p>
+<p>另外，什么时候开始发布、发布成功没有、失败在哪里、谁触发的，这些信息只停留在执行机器的日志里，甚至都没有，那么后面的问题发现和跟进也无从说起了。</p>
+<h2>常见的几种 CI/CD 实现方式</h2>
+<p>市面上实现的方式有不少，不同团队适合的方案并不一样。这里简单过一下常见的选择：</p>
+<p><center><img src="/images/2026/cicd-approaches.svg" alt="cicd-approaches" style="zoom: 82%;" /></center></p>
+<h3>Jenkins</h3>
+<p>Jenkins 是老牌的方案了，插件生态丰富，可定制能力强。历史系统多、流水线逻辑复杂、需要大量自定义插件或脚本的团队，用 Jenkins 往往比较顺手。</p>
+<p>但维护成本也比较高。插件版本、构建节点、凭证、权限、任务模板都要持续治理，否则时间久了很容易从自动化工具变成另一个"脚本堆放处"。</p>
+<h3>GitHub Actions</h3>
+<p>GitHub Actions 对 GitHub 生态很友好，配置轻，Marketplace 里可复用的 action 也多。代码本身就在 GitHub 的团队用起来比较自然。</p>
+<p>但如果公司用的是自建 GitLab，部署又依赖内网机器、私有镜像仓库和固定构建环境，那就不一定合适了。</p>
+<h3>云厂商流水线</h3>
+<p>云厂商的流水线服务通常和自家资源，比如网络、镜像仓库、权限体系等集成得很好，资源如果基本在同一家云上的团队可以一试。</p>
+<p>但问题在于绑定，以及成本也需要考虑。只要存在本地机房、自建 GitLab、多云环境或者历史服务器，后续迁移和兼容成本就要提前考虑。</p>
+<h3>Kubernetes + GitOps 工具</h3>
+<p>基础设施已经比较云原生的话，Argo CD、Flux 这类 GitOps 工具会很自然。核心思路是把集群期望状态写在 Git 里，由控制器持续对比并收敛实际状态。这一套我也没实际用过，但我认为前提是相对的，公司本身已经到一定规模且有技术储备，相关的服务部署、配置管理、集群治理都已经比较成熟。</p>
+<h3>GitLab CI + GitLab Runner</h3>
+<p>目前项目采用的形式。</p>
+<p>原因主要在于：</p>
+<ul>
+<li>代码本身已经在 GitLab</li>
+<li>分支、tag、用户、变量这些 CI 上下文可以直接使用</li>
+<li>Runner 部署在自己的构建机上，访问内网资源、Docker、SSH 和私有仓库</li>
+<li>GitOps 仓库也在 Git 中，流水线可以在构建后直接回写部署配置</li>
+</ul>
+<p>最后方案没有绝对，都是基于当时工程环境下的取舍，它能用相对少的系统，把代码、构建、镜像、部署配置和通知串在一起。</p>
+<h2>项目整体链路</h2>
+<p>回到项目，当前整个工程链路如图所示：</p>
+<p><center><img src="/images/2026/cicd-overview.svg" alt="cicd-overview" style="zoom: 78%;" /></center></p>
+<ol>
+<li>代码提交后触发 GitLab CI</li>
+<li>GitLab Runner 拉起任务并注入 CI 上下文</li>
+<li>统一入口脚本 <code>run.sh</code> 开始执行</li>
+<li><code>env.sh</code> 根据环境、项目、应用解析部署目标</li>
+<li>不同类型项目进入各自的 <code>script/ci/*</code> 构建脚本</li>
+<li>构建完成后推送镜像，并把新版本写回对应环境的 GitOps yml</li>
+<li><code>compose.sh</code> 根据更新后的编排执行部署</li>
+<li><code>feishu.sh</code> 把发布开始、成功、失败的状态反馈出去</li>
+</ol>
+<h2>核心流程</h2>
+<h3>1. <code>env.sh</code>：先确定发到哪里</h3>
+<p><code>script/cicd/env.sh</code> 的职责，是把发布请求按环境、项目、应用逐层路由，最后得到目标主机或目标环境。</p>
+<p>环境层只关心 dev、gray、prod 等差异，项目层只关心自己业务域里的应用映射，应用接入时只需要补对应规则，不必改总入口。</p>
+<h3>2. <code>run.sh</code>：统一入口与总控编排</h3>
+<p><code>script/cicd/run.sh</code> 是整套链路的总入口，主要做几件事：</p>
+<ol>
+<li>解析当前环境、项目、应用和目标主机</li>
+<li>做一些公共准备动作</li>
+<li>根据项目类型计算版本 tag</li>
+<li>按技术栈分发到不同 CI 脚本</li>
+<li>构建完成后继续进入部署动作</li>
+</ol>
+<p>这里针对不同项目会有些差异化处理，比如前端可从 <code>package.json</code> 取版本，Java 项目可从 Maven 取，Gradle 项目可从 <code>gradle.properties</code> 取，正式环境则优先绑定明确的tag。</p>
+<h3>3. <code>script/ci/*</code>：按技术栈完成构建</h3>
+<p>构建脚本按技术栈拆开：</p>
+<ul>
+<li><code>web</code></li>
+<li><code>java</code></li>
+<li><code>java11</code></li>
+<li><code>java-jib</code></li>
+<li><code>kotlin</code></li>
+<li><code>python-naked</code></li>
+</ul>
+<p>前端有自己的 Node 版本和构建命令，Java 有 Maven，Kotlin 有 Gradle 和模块名映射，Python也有自己的部署方式，从poetry到uv。</p>
+<p>CI 脚本做完构建之后，不只是推镜像，还会把新镜像版本写回 GitOps 配置。</p>
+<h3>4. <code>compose.sh</code>：按 GitOps 配置完成部署</h3>
+<p><code>script/cd/compose.sh</code> 拉取最新 GitOps 配置，根据目标服务执行部署，并把配置变更提交回 Git。</p>
+<p>真正驱动部署的不是某个临时命令，而是 Git 中已经更新过的环境描述。后面再回头看某个环境时，不只是知道它"现在跑着什么"，还能知道它"为什么变成这样"。</p>
+<h3>5. <code>feishu.sh</code>：补齐团队感知</h3>
+<p>测试、产品、上下游系统等相关人员都需要知道当前有没有发布、发布是否成功、失败时是谁触发的。</p>
+<p><code>script/util/feishu.sh</code> 做的就是这层反馈：正在发布、发布成功、发布失败。</p>
+<h2>GitLab Runner 在这里承担什么角色</h2>
+<p>在项目的脚本里会使用 <code>CI_COMMIT_REF_NAME</code>、<code>CI_COMMIT_TAG</code>、<code>CI_REPOSITORY_URL</code>、<code>GITLAB_USER_EMAIL</code> 这些变量，然后会通过 GitLab CI token 回写 Git 仓库。</p>
+<p>整条链路由 GitLab CI 触发，再由 GitLab Runner 真正执行。简单说：GitLab 负责管理代码、流水线、分支、tag、变量等上下文，Runner 负责把任务拉起来，在指定环境里执行脚本。</p>
+<p>它要做的事情包括：</p>
+<ul>
+<li>拉取代码</li>
+<li>注入 CI 变量</li>
+<li>执行统一入口脚本</li>
+<li>调用构建工具</li>
+<li>构建并推送镜像</li>
+<li>修改 GitOps 配置</li>
+<li>通过 SSH 或 compose 完成部署</li>
+<li>把发布结果通知出去</li>
+</ul>
+<p>关于 Runner 的安装、注册、执行器选择、变量配置，官方文档已经很完整，这里不展开：</p>
+<ul>
+<li><a href="https://docs.gitlab.com/runner/install/">Install GitLab Runner</a></li>
+<li><a href="https://docs.gitlab.com/runner/register/">Registering runners</a></li>
+<li><a href="https://docs.gitlab.com/ci/">Get started with GitLab CI/CD</a></li>
+<li><a href="https://docs.gitlab.com/ci/yaml/">CI/CD YAML syntax reference</a></li>
+<li><a href="https://docs.gitlab.com/ci/variables/">CI/CD variables</a></li>
+</ul>
+<h2><code>.gitlab-ci.yml</code> 怎么写</h2>
+<p>对于业务方，主要关注的是<code>.gitlab-ci.yml</code>文件，那么相对的设计原则是尽量让业务项目的 <code>.gitlab-ci.yml</code> 保持简单。</p>
+<p>业务仓库只描述几件事：有哪些 stage，哪些分支或 tag 触发哪些 job，job 应该跑在哪类 Runner 上，最后调用哪个统一入口脚本。至于具体怎么构建、怎么推镜像、怎么改 GitOps 配置、怎么部署，都沉到统一的 GitOps 工程脚本里维护。</p>
+<p>一个简化后的示例如下：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">format-feature</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-feature</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scan-feature</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-dev</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-gray</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prepare-prod</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-prod</span>
+
+<span class="nt">variables</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">RUN_ARGS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;java11</span><span class="nv"> </span><span class="s">project</span><span class="nv"> </span><span class="s">service-name&quot;</span>
+
+<span class="nt">.cicd-dev</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-dev</span>
+<span class="w">  </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package-build-runner</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_COMMIT_BRANCH == &quot;dev&quot;</span>
+
+<span class="nt">job_cicd-dev_service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extends</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.cicd-dev</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sh /opt/gitops/scripts/cicd/run.sh dev $RUN_ARGS</span>
+
+<span class="nt">job_cicd-gray_service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-gray</span>
+<span class="w">  </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package-build-runner</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_COMMIT_BRANCH == &quot;gray&quot;</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sh /opt/gitops/scripts/cicd/run.sh gray $RUN_ARGS</span>
+
+<span class="nt">job_prepare-prod_service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prepare-prod</span>
+<span class="w">  </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manual</span>
+<span class="w">  </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package-build-runner</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_COMMIT_BRANCH == &quot;master&quot;</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sh /opt/gitops/scripts/prepare/release.sh maven11</span>
+
+<span class="nt">job_cicd-prod_service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cicd-prod</span>
+<span class="w">  </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package-build-runner</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_COMMIT_TAG</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sh /opt/gitops/scripts/cicd/run.sh prod $RUN_ARGS</span>
+</code></pre></div>
+
+<p>这里几个变量解释一下：</p>
+<p><code>stages</code> 表达交付顺序。feature 分支做格式化、测试、扫描；dev 分支发开发环境；gray 分支发灰度或预发环境；master 做正式发布前准备；tag 触发正式发布。这样分支模型和发布模型就对应起来了。</p>
+<p><code>variables</code> 只放非敏感参数。应用类型、项目名、服务名可以放这里，token、密码、私钥、Webhook 这类内容放到 GitLab 的 CI/CD Variables 中。</p>
+<p><code>tags</code> 决定 job 跑在哪个 Runner 上。<code>package-build-runner</code> 这类 tag 意味着这个 job 需要被调度到具备对应构建和部署能力的 Runner 上。</p>
+<p><code>rules</code> 控制触发范围。相比早期的 <code>only</code>，<code>rules</code> 的表达能力更强，推荐使用。原则是不要让所有 job 在所有分支上都跑。</p>
+<p><code>extends</code> 用来复用模板。公共的 <code>stage</code>、<code>tags</code>、<code>rules</code>、<code>when</code> 放在模板里，具体 job 只保留自己的 <code>script</code>。</p>
+<p>最后，<code>script</code> 尽量只调用统一入口。业务项目的 <code>.gitlab-ci.yml</code> 不要堆太多构建细节，否则每个项目又会慢慢发展出自己的发布逻辑。</p>
+<h2>发布与回滚</h2>
+<p>日常环境和正式环境的节奏是不一样的。</p>
+<p>dev 和 gray 更偏向快速迭代，目标是让联调、测试尽快拿到结果，所以都是自动构建、自动推镜像、自动更新配置、自动部署。</p>
+<p>prod 产线版本，不应该简单拿当前分支状态直接往前推，而是要绑定明确 tag，让发布更像一次版本发布。</p>
+<p>回滚上，没有额外做很复杂的平台能力，但因为部署事实已经在 GitOps 配置里，路径是清楚的：找到上一个稳定镜像版本，把对应环境 yml 中的 image 改回去，重新执行部署。比"去服务器上猜上一次运行的镜像是什么"可靠很多。</p>
+<p>不过需要注意，单纯的服务功能回滚容易，涉及数据库结构变更的回滚就是另一回事了。</p>
+<h2>所以这套方案整体上是什么</h2>
+<p><strong>基于 GitLab Runner 执行，以 Git 仓库承载部署事实，用 GitOps 思路组织环境编排的 CI/CD 流程。</strong></p>
+<p>Git 在这里不只是存代码，还承担了三层角色：流水线触发源、版本变更记录源、部署编排事实源。</p>
+<h3>这套方案的优点和边界</h3>
+<p>优点：</p>
+<ol>
+<li>统一了发布入口，项目接入和维护成本更低</li>
+<li>利用了 GitLab Runner 的执行能力，和现有 GitLab 体系结合自然</li>
+<li>兼容多技术栈，不强行要求所有项目走同一种构建方式</li>
+<li>用 GitOps 思想把镜像版本和部署配置串起来</li>
+<li>发布过程有通知反馈，团队感知更明确</li>
+</ol>
+<p>边界也很明显：</p>
+<ol>
+<li>脚本约定比较重，都是 shell，后期不维护好，重新理解起来很费力</li>
+<li>Runner 节点的环境治理很重要，宿主机差异会影响稳定性</li>
+<li>项目规模继续扩大后，映射规则和脚本数量还需要进一步平台化</li>
+<li>当前更像一套工程实践，还不是完整的发布平台产品</li>
+</ol>
+<p>这里的工作主要是将工作流程抽象化组织起来，然后再用脚本把规则固化下来，接着看哪些规则值得抽象成平台。</p>
+<h2>如果结合 AI，还能继续往哪走</h2>
+<p><em><u><!--2026回看更新--></u></em>。</p>
+<p>在上述工程实现后的这两年 AI 在研发流程里的应用越来越多，再看看AI能在这个项目里能做些什么 。</p>
+<p>要说明的是，不是说有了 AI 就能替代发布系统。CI/CD 的核心仍然是规则、权限、环境、流程和可追踪性。AI 更适合做辅助层，帮助人更快理解变化、识别风险、整理信息，而不是直接绕过已有流程去"自动决策"。</p>
+<h3>1. 发布前风险识别</h3>
+<p>一次发布到底改了哪些模块，是否涉及配置变化，是否有数据库结构调整，是否影响启动参数，是否需要测试重点关注某些链路，这些目前更多还是靠研发或负责人自己判断。</p>
+<p>如果结合 AI，可以在发布前基于 MR diff、commit message、变更文件、GitOps 配置差异，生成一份发布风险提示：</p>
+<ul>
+<li>本次涉及哪些服务和模块</li>
+<li>是否改动了环境变量、端口、volume 等部署相关配置</li>
+<li>是否有数据库、缓存、消息队列等中间件相关变更</li>
+<li>是否建议人工确认后再发布</li>
+<li>测试回归重点应该放在哪里</li>
+</ul>
+<p>提前将风险暴漏出来，可以按等级排列，提前进行发布前的预审以防遗漏信息，和可能出现的很多未曾考虑过的风险情况。</p>
+<p>一般在版本发布前本身也会有文档整理和归档，这里可以做比对，甚至可以让各模块负责人做审核确认，机制可以很细，但真正实现也需要兼顾效率。</p>
+<h3>2. 发布说明自动生成</h3>
+<p>目前的发布通知比较机械，只有"某某服务正在发布""发布成功""发布失败"。</p>
+<p>从团队协作角度看，更希望透明化一些：这次发布到底包含什么，影响什么范围，失败了应该找谁，测试应该验证什么。</p>
+<p>AI 可以把 commit、MR、tag、变更文件、发布服务整理成更可读的发布说明：本次包含哪些功能或修复，影响哪些服务，是否有配置变更，是否有兼容性风险，是否需要业务方关注等。 </p>
+<h3>3. 失败日志辅助分析</h3>
+<p>CI/CD 失败的时候，首先要判断问题在哪一层。是依赖下载失败，还是单测失败；是 Docker build 失败，还是镜像推送失败；是 SSH 不通，还是目标机器环境不对；是脚本参数错了，还是 GitOps 配置没更新。</p>
+<p>这些判断除了靠有经验的人，也可以先让 AI 来分析，节省排查时间。尤其是生产环境发布失败，时效性要求很高。</p>
+<p>比如 AI 可以基于 Runner 日志、构建日志、部署日志做初步归类：</p>
+<ul>
+<li>失败阶段：构建 / 推镜像 / 更新配置 / 部署</li>
+<li>疑似原因：依赖不可达 / 权限不足 / 参数缺失 / 环境不一致</li>
+<li>建议排查：检查哪个变量、哪个配置、哪个服务日志</li>
+</ul>
+<p>核心是减少排查时间，不是要做到自动修复。</p>
+<h2>最后</h2>
+<p>这套方案支撑了后续的所有变更和迭代，包括dev环境快速的测试以及生产环境几个大版本的发布，基本都在几分钟之内达到从发布到上线，职能也更加清晰了，业务能够更加专注在业务代码上，而不用自己去提心吊胆各个环境的问题。</p>
+<p>当然也有没解决好的地方。脚本积累久了之后，有些历史逻辑已经说不清当初为什么这么写，改起来也会有顾虑。这类问题靠文档是一方面，另一方面也是接下来可以结合 AI 做脚本解释和审查，甚至帮忙重构。</p>
+<p>最终就发布流程这件事，能做到稳定、可追踪、出问题有人知道，当前就已经达到目的了。</p>
+            <section id="copyright">
+            <center>
+                <div class="copyright">
+                    版权声明：自由转载-非商用-非衍生-保持署名
+                </div>
+                <!--div class="donation">
+                    <img src="/images/donation.png"/>
+                    <br>
+                    <strong> 如果你觉得我的文章或项目对你有所帮助, You can buy me a cup of coffee:) </strong>
+                </div-->
+            </center>
+            </section>
+            <div class="hr"></div>
+            <a href="#" class="go-top">Go Top</a>
+<div class="comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = "nexrol"; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div><footer class="footer">
+    <p>&copy; Z晓L's Blog &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+</footer>        </div>
+    </div>
+</div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+</body>
+</html>

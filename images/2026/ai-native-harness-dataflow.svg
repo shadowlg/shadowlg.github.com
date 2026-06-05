@@ -1,0 +1,83 @@
+<svg width="1080" height="620" viewBox="0 0 1080 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AI Coding 进入生产的工程闭环</title>
+  <desc id="desc">展示 AI Native 软件工程从战略、产品抽象、工程架构、开发约束到 AI 执行层，以及 Harness Engineering 中需求、上下文、AI Agent、生成、验证、发布和反馈的闭环。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#495057"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1080" height="620" fill="#ffffff"/>
+  <text x="540" y="48" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="28" font-weight="700" fill="#212529">AI Coding 进入生产的工程闭环</text>
+  <text x="540" y="78" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" fill="#6c757d">模型能力只是底层执行力，真正的分水岭在产品抽象、工程约束和自动验证</text>
+
+  <text x="90" y="125" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="700" fill="#343a40">组织与工程分层</text>
+
+  <g filter="url(#shadow)">
+    <rect x="52" y="145" width="172" height="52" rx="8" fill="#fff3bf" stroke="#f08c00" stroke-width="2"/>
+    <rect x="52" y="218" width="172" height="52" rx="8" fill="#d0ebff" stroke="#1971c2" stroke-width="2"/>
+    <rect x="52" y="291" width="172" height="52" rx="8" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2"/>
+    <rect x="52" y="364" width="172" height="52" rx="8" fill="#e5dbff" stroke="#6741d9" stroke-width="2"/>
+    <rect x="52" y="437" width="172" height="52" rx="8" fill="#ffe3e3" stroke="#c92a2a" stroke-width="2"/>
+  </g>
+
+  <text x="138" y="177" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#212529">CEO / 战略层</text>
+  <text x="138" y="250" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#212529">产品抽象层</text>
+  <text x="138" y="323" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#212529">工程架构层</text>
+  <text x="138" y="396" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#212529">开发约束层</text>
+  <text x="138" y="469" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="600" fill="#212529">AI 执行层</text>
+
+  <line x1="138" y1="198" x2="138" y2="216" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="138" y1="271" x2="138" y2="289" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="138" y1="344" x2="138" y2="362" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="138" y1="417" x2="138" y2="435" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="282" y="122" width="740" height="412" rx="16" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="652" y="157" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="20" font-weight="700" fill="#343a40">Harness Engineering</text>
+  <text x="652" y="184" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" fill="#6c757d">把 AI 放进受约束、可执行、可验证的工程环境</text>
+
+  <g filter="url(#shadow)">
+    <rect x="330" y="235" width="126" height="70" rx="8" fill="#d0ebff" stroke="#1971c2" stroke-width="2"/>
+    <rect x="486" y="235" width="138" height="70" rx="8" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2"/>
+    <rect x="656" y="235" width="118" height="70" rx="8" fill="#fff3bf" stroke="#f08c00" stroke-width="2"/>
+    <rect x="806" y="235" width="136" height="70" rx="8" fill="#e5dbff" stroke="#6741d9" stroke-width="2"/>
+  </g>
+
+  <text x="393" y="264" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">需求 / 指标</text>
+  <text x="393" y="286" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">目标、边界、验收</text>
+  <text x="555" y="264" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">上下文资产</text>
+  <text x="555" y="286" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">文档、血缘、契约</text>
+  <text x="715" y="264" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">AI Agent</text>
+  <text x="715" y="286" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">理解、计划、执行</text>
+  <text x="874" y="264" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">代码 / SQL / 配置</text>
+  <text x="874" y="286" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">可审查的变更</text>
+
+  <line x1="456" y1="270" x2="484" y2="270" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="624" y1="270" x2="654" y2="270" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="774" y1="270" x2="804" y2="270" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="410" y="385" width="170" height="76" rx="8" fill="#ffe3e3" stroke="#c92a2a" stroke-width="2"/>
+    <rect x="632" y="385" width="160" height="76" rx="8" fill="#d0ebff" stroke="#1971c2" stroke-width="2"/>
+    <rect x="838" y="385" width="122" height="76" rx="8" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2"/>
+  </g>
+
+  <text x="495" y="414" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">自动验证</text>
+  <text x="495" y="436" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">测试、质量、成本、安全</text>
+  <text x="712" y="414" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">发布 / 监控</text>
+  <text x="712" y="436" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">灰度、告警、回滚</text>
+  <text x="899" y="414" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="600" fill="#212529">反馈</text>
+  <text x="899" y="436" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#495057">沉淀为规则</text>
+
+  <line x1="874" y1="305" x2="874" y2="345" stroke="#495057" stroke-width="2"/>
+  <line x1="874" y1="345" x2="497" y2="345" stroke="#495057" stroke-width="2"/>
+  <line x1="497" y1="345" x2="497" y2="383" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="580" y1="423" x2="630" y2="423" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="792" y1="423" x2="836" y2="423" stroke="#495057" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M899 385 C900 210 590 198 555 235" fill="none" stroke="#868e96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+
+  <text x="540" y="575" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" fill="#6c757d">AI Native 的关键不是跳过工程，而是把工程规则变成 AI 可以执行和反馈的系统</text>
+</svg>
